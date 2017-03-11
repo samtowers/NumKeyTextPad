@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace NumKeyTextPad
 {
-	public partial class Form1 : Form
+	public partial class c : Form
 	{
-		public Form1()
+		public c()
 		{
 			InitializeComponent();
 		}
