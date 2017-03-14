@@ -1,6 +1,6 @@
 ﻿namespace NumKeyTextPad
 {
-	partial class c
+	partial class TextPadForm
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -30,12 +30,12 @@
 		{
 			this.SuspendLayout();
 			// 
-			// c
+			// TextPad
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(410, 331);
-			this.Name = "c";
+			this.Name = "TextPad";
 			this.Text = "Form1";
 			this.ResumeLayout(false);
 

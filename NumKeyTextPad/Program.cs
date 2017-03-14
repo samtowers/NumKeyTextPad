@@ -16,7 +16,7 @@ namespace NumKeyTextPad
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new c());
+			Application.Run(new TextPadForm());
 		}
 	}
 }
