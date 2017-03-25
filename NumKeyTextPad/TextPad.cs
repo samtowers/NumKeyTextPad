@@ -15,7 +15,7 @@ namespace NumKeyTextPad
 			this.SetAutoSizeMode(AutoSizeMode.GrowAndShrink);
 			this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 			this.BackColor = Color.Yellow;
-			this.Font = new Font("Tahoma", 24, FontStyle.Regular);
+			this.Font = new Font("Consolas", 20, FontStyle.Regular);
 		}
 	}
 }
