@@ -126,5 +126,18 @@ namespace NumKeyTextPad
 				this.WindowState = this.WindowState == FormWindowState.Maximized ? FormWindowState.Minimized : FormWindowState.Maximized;
 			}
 		}
+
+		/** 
+		 * This will supress the window from appearing the ALT-TAB dialog.
+		 */
+		protected override CreateParams CreateParams
+		{
+			get
+			{
+				var Params = base.CreateParams;
+				Params.ExStyle |= 0x80;
+				return Params;
+			}
+		}
 	}
 }
