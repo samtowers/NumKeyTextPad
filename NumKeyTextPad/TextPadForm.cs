@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 using Gma.UserActivityMonitor;
 
 namespace NumKeyTextPad
@@ -16,7 +17,10 @@ namespace NumKeyTextPad
 	{
 		TextPad textPad;
 		NotifyIcon notifyIcon;
-		
+		public event	Action FormHide;
+		string logFile;
+		int prevLogHashCode = 0;
+
 		public TextPadForm()
 		{
 			// Init the VS designer features
@@ -24,6 +28,7 @@ namespace NumKeyTextPad
 			// Initialize the TextPadForms component properties (declared in the designer)
 			this.components = new System.ComponentModel.Container();
 			SetupForm();
+			SyncToLogFile();
 			ListenForKeyInput();
 		}
 		
@@ -31,10 +36,11 @@ namespace NumKeyTextPad
 		{
 			/** Setup Form **/
 			this.FormBorderStyle = FormBorderStyle.None;
-			this.Opacity = 0.7;
+			//this.Opacity = 0.7;
 			this.BackColor = Color.Yellow;
 			this.ShowInTaskbar = false;
 			this.SetWindowState(FormWindowState.Minimized);
+			this.TopMost = true;
 
 			/** Setup TextPad **/
 			textPad = new TextPad();
@@ -47,7 +53,66 @@ namespace NumKeyTextPad
 			/** Setup NotifyIcon **/
 			setupNotifyIcon();
 		}
-		
+
+		/**
+		 * Keep the text on the form automatically synced to a file. 
+		 * If no file has previously been set or the file has otherwise been moved, then
+		 * launch a file select dialog.
+		 * If no
+		 */
+		private void SyncToLogFile()
+		{
+			this.logFile = FetchLogFile();
+
+			if (!string.IsNullOrWhiteSpace(logFile))
+			{
+				// Update Textpad
+				textPad.Text = File.ReadAllText(this.logFile);
+				prevLogHashCode = textPad.Text.GetHashCode();
+				
+				// Log file changes are commited when the dialog is hidden or the form is closed.
+				this.FormHide += UpdateLogFile;
+				this.FormClosing += delegate (object sender, FormClosingEventArgs args) { UpdateLogFile(); };
+			}
+		}
+
+		// Save to the current log file.
+		// This method assumes a valid log file has been set.
+		private void UpdateLogFile()
+		{
+			// Only update on text changes.
+			if (prevLogHashCode != textPad.Text.GetHashCode())
+			{
+				File.WriteAllText(this.logFile, textPad.Text);
+				prevLogHashCode = textPad.Text.GetHashCode();
+			}
+		}
+
+		// If a log file was previously set, grab and check if it exists. If no log file
+		// was previously set or the stored log file does not exist, the ask the user for
+		// a new one.
+		private string FetchLogFile()
+		{
+			string file = (string) Properties.Settings.Default["LogFile"];
+			if (!File.Exists(file))
+			{
+				OpenFileDialog dialog = new OpenFileDialog();
+				dialog.RestoreDirectory = true;
+				if (dialog.ShowDialog() == DialogResult.OK)
+				{
+					file = dialog.FileName;
+					Properties.Settings.Default["LogFile"] = file;
+					Properties.Settings.Default.Save();
+				}
+				else
+				{
+					file = null;
+				}
+			}
+
+			return file;
+		}
+
 		private void setupNotifyIcon()
 		{
 			/** Presentation of the Icon **/
@@ -109,6 +174,8 @@ namespace NumKeyTextPad
 			{
 				args.Handled = true;
 				SetWindowState(); 
+
+				if (this.WindowState == FormWindowState.Minimized) FormHide();
 			}
 		}
 
@@ -128,7 +195,7 @@ namespace NumKeyTextPad
 		}
 
 		/** 
-		 * This will supress the window from appearing the ALT-TAB dialog.
+		 * This override will supress the window from appearing the ALT-TAB dialog.
 		 */
 		protected override CreateParams CreateParams
 		{

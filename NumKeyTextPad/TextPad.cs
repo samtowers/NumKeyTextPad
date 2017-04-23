@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace NumKeyTextPad
 {
@@ -14,7 +15,9 @@ namespace NumKeyTextPad
 		{
 			this.SetAutoSizeMode(AutoSizeMode.GrowAndShrink);
 			this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-			this.BackColor = Color.Yellow;
+			this.BackColor = Color.Black;
+			this.ForeColor = Color.LightGray;
+			this.BorderStyle = BorderStyle.None;
 			this.Font = new Font("Consolas", 20, FontStyle.Regular);
 		}
 	}
