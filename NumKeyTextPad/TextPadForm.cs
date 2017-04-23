@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Gma.UserActivityMonitor;
+using System.Diagnostics;
 
 namespace NumKeyTextPad
 {
@@ -17,9 +18,11 @@ namespace NumKeyTextPad
 	{
 		TextPad textPad;
 		NotifyIcon notifyIcon;
-		public event	Action FormHide;
+		public event Action FormHide;
 		string logFile;
 		int prevLogHashCode = 0;
+		bool allowVisibility = false;
+
 
 		public TextPadForm()
 		{
@@ -39,7 +42,6 @@ namespace NumKeyTextPad
 			//this.Opacity = 0.7;
 			this.BackColor = Color.Yellow;
 			this.ShowInTaskbar = false;
-			this.SetWindowState(FormWindowState.Minimized);
 			this.TopMost = true;
 
 			/** Setup TextPad **/
@@ -74,6 +76,11 @@ namespace NumKeyTextPad
 				this.FormHide += UpdateLogFile;
 				this.FormClosing += delegate (object sender, FormClosingEventArgs args) { UpdateLogFile(); };
 			}
+		}
+
+		protected override void SetVisibleCore(bool value)
+		{
+			base.SetVisibleCore(this.allowVisibility ? value : false);
 		}
 
 		// Save to the current log file.
@@ -127,7 +134,7 @@ namespace NumKeyTextPad
 			/** Double Click to show form **/
 			notifyIcon.DoubleClick += delegate (object sender, EventArgs args)
 			{
-				this.SetWindowState(FormWindowState.Maximized);
+				this.ToggleWindowVisibility(true);
 			};
 		}
 
@@ -138,14 +145,14 @@ namespace NumKeyTextPad
 			/** Show Button **/
 			MenuItem showMenuItem = new MenuItem("Show");
 			showMenuItem.Click += delegate (object sender, EventArgs args) {
-				this.SetWindowState(FormWindowState.Maximized);
+				this.ToggleWindowVisibility(true);
 			};
 			cm.MenuItems.Add(showMenuItem);
 
 			/** Hide Button **/
 			MenuItem hideMenuItem = new MenuItem("Hide");
 			hideMenuItem.Click += delegate (object sender, EventArgs args) {
-				this.SetWindowState(FormWindowState.Minimized);
+				ToggleWindowVisibility(false);
 			};
 			cm.MenuItems.Add(hideMenuItem);
 			
@@ -173,38 +180,20 @@ namespace NumKeyTextPad
 			if (args.KeyCode == Keys.NumPad5)
 			{
 				args.Handled = true;
-				SetWindowState(); 
+				ToggleWindowVisibility();
 
 				if (this.WindowState == FormWindowState.Minimized) FormHide();
 			}
 		}
-
-		/**
-		 * Set the form window state or toggle between Maximized and Minimized.
-		 */
-		private void SetWindowState(FormWindowState? forceState = null)
+		
+		private void ToggleWindowVisibility(bool? forceShowForm = null)
 		{
-			if (forceState.HasValue)
-			{
-				this.WindowState = forceState.Value;
-			}
+			this.allowVisibility = true;
+
+			if (forceShowForm.HasValue ? forceShowForm.Value : !this.Visible)
+				this.Show();
 			else
-			{
-				this.WindowState = this.WindowState == FormWindowState.Maximized ? FormWindowState.Minimized : FormWindowState.Maximized;
-			}
-		}
-
-		/** 
-		 * This override will supress the window from appearing the ALT-TAB dialog.
-		 */
-		protected override CreateParams CreateParams
-		{
-			get
-			{
-				var Params = base.CreateParams;
-				Params.ExStyle |= 0x80;
-				return Params;
-			}
+				this.Hide();
 		}
 	}
 }
