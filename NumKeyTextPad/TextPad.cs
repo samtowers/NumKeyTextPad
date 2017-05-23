@@ -19,6 +19,15 @@ namespace NumKeyTextPad
 			this.ForeColor = Color.LightGray;
 			this.BorderStyle = BorderStyle.None;
 			this.Font = new Font("Consolas", 20, FontStyle.Regular);
+
+			this.KeyDown += delegate (object sender, KeyEventArgs e) 
+			{
+				if (e.Control && e.KeyCode == Keys.V)
+				{
+					((RichTextBox)sender).Paste(DataFormats.GetFormat("Text"));
+					e.Handled = true;
+				}
+			};
 		}
 	}
 }
